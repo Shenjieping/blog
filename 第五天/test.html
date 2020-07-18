@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+  "use strict"; // => 开启严格模式
+  var a = 4;
+  function b(x, y, a) {
+    /* 
+      在严格模式下 x/y/a 和 arguments 没有映射机制，是独立的
+    */
+    console.log(a); // 3
+    arguments[2] = 10; // a的值不会变
+    console.log(a); // 3
+    a = 100;
+    console.log(arguments[2]); // 10
+  }
+  a = b(1, 2, 3);
+  console.log(a); // undefined
+  </script>
+</body>
+</html>
