@@ -22,7 +22,7 @@
   arr = arr.map(parseInt);
   ```
 7. 数组常用方法
-8. 如何判断一个字符串是否是属于某个对象的属性，hasOwnproperty is 两个的区别
+8. 如何判断一个字符串是否是属于某个对象的属性，hasOwnProperty is 两个的区别
 9. 谈谈你对闭包的理解，以及在项目中的应用
 10. ES5的继承有哪些，和ES6的calss有什么区别
 11. 编写queryUrlParams 方法, 至少两种方法
@@ -107,4 +107,17 @@
   f2.getY();
   Fn.prototype.getY();
   f1.sum();
+  ```
+17. 写出下面的结果
+  ```js
+  function fn1() {
+    console.log(1);
+  }
+  function fn2() {
+    console.log(2);
+  }
+  fn1.call(fn2);
+  fn1.call.call(fn2);
+  Function.prototype.call(fn1);
+  Function.prototype.call.call(fn1);
   ```
