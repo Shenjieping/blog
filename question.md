@@ -121,3 +121,32 @@
   Function.prototype.call(fn1);
   Function.prototype.call.call(fn1);
   ```
+18. 写出下面的执行结果
+
+  ```js
+  function Foo() {
+    getName = function() {
+      console.log(1);
+    }
+    return this;
+  }
+  Foo.getName = function() {
+    console.log(2);
+  }
+  Foo.prototype.getName = function() {
+    console.log(3);
+  }
+  var getName = function() {
+    console.log(4);
+  }
+  function getName() {
+    console.log(5);
+  }
+  Foo.getName();
+  getName();
+  Foo().getName();
+  getName();
+  new Foo.getName();
+  new Foo().getName();
+  new new Foo().getName();
+  ```
