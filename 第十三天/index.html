@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #box {
+      height: 100px;
+      width: 100px;
+      background-color: #f66;
+    }
+    #outer {
+      height: 300px;
+      width: 300px;
+      margin: 20px auto;
+      background: red;
+    }
+    #inner {
+      height: 200px;
+      width: 200px;
+      margin: 20px auto;
+      background: green;
+    }
+    #center {
+      height: 100px;
+      width: 100px;
+      margin: 20px auto;
+      background: blue;
+    }
+  </style>
+</head>
+<body>
+  <div id="box"></div>
+
+  <script>
+    /* 
+      事件是浏览器天生就具备的行为，不论我们是否基于js代码绑定了方法，只要相关的行为处罚，则一定会触发相关的事件
+      鼠标事件行为
+        mouseover   鼠标经过
+        mouseout    鼠标离开
+        mouseenter  鼠标进入
+        mouseleave  鼠标离开
+        mousemove   鼠标移动
+        mouserdown  鼠标按下
+        mouseup     鼠标抬起
+        click       点击
+        dblclick    双击（浏览器在300ms内连续触发两次点击，会触发双击）
+        mousewheel  鼠标滚动
+        contextmenu 鼠标右键点击
+      键盘
+        keydown     按键按下
+        keyup       按键抬起
+        keypress    按键长按
+        input       文本框内容输入中
+      其他事件
+        change      内容改变
+        blur        文本框失去焦点
+        fouce       文本获取焦点
+        submit      表单提交事件
+        resize      大小改变
+        scroll      滚动时间
+        load        加载完成
+        error       加载失败
+        drag/dragstart/dragend  h5新增的拖拽
+        DOMContectloaded    DOM结构加载完成
+      移动端事件
+        touchstart    手指按下
+        touchmove     手指移动
+        touchend      手指离开
+        touchcancel   因为意外的情况下导致操作取消
+        gesturestart  多手指
+        gestureend
+        gesturechange
+     */
+    // 参考网址： https://developer.mozilla.org/zh-CN/docs/Web/Events
+
+    /* 
+      DOM0级事件绑定: 元素.onxxx = function() {}
+      DOM2级事件绑定:
+        标准浏览器：元素.addEventListener('xxx', function() {})
+        IE6~8: 元素.attachEvent('onxxx', function() {})
+     */
+    /* 
+      DOM0和DOM2区别：
+        DOM0事件绑定：
+          1. 事件绑定的原理就是给当前元素对象的某些私有属性，（私有属性/onxxx）赋值一个函数，当事件触发，浏览器会帮助把绑定的事件触发
+            box.onclick = function() {}
+            -> 移除事件绑定: box.onclick = null;
+            -> 只能给当前元素的某个时间行为绑定一个方法，绑定多个方法会把之前的替换掉
+          2. 如果元素私有属性中不具备某个事件的私有属性，例如：ontransitionend/onDOMContentLoaded，则无法绑定方法
+        DOM2事件绑定：
+          1. 基于元素的原型链，找到EventTarget.prototype 使用内置的addEventListener或者removeEventListener进行事件的绑定和移除
+          2. 底层原理是基于浏览器内置的事件池机制来完成时间的绑定的
+            -> 可以给当前元素的某个时间类型，绑定多个不同的方法，时间触发后会按照绑定的顺序依次执行
+            -> 浏览器中所有的事件类型都可以用做时间绑定 box.addEventListener('transitionend', func)
+
+      真实开发过程中，DOM0和DOM2可以共存，不会冲突，而且一般用DOM2更多，其机制相对比较完善
+      类似于jQ这个类库，或一些常用的插件，都是用DOM2绑定
+     */
+    /* 
+      经典面试题：
+        window.onload 和 document.ready (JQ.$(document).ready())的区别？
+          1. load 是等待所有资源都加载完成，才会触发执行，而我之前研究过部分JQ的源码 $(document).ready() 是用的 DOMContentLoaded 时间时间本身是DOM结构加载完成就会触发执行，所以他要优先于window.onload触发
+          2. window.onload 是基于DOM0级绑定，整个页面只能绑定一次，所以页面只能用一次，而JQ中是基于 DOM2级完成的，所以在一个页面中可以绑定多个不同的方法，也就是多次使用，我之前在JQ开发中，经常把编写的代码放在 $(function() {}),既能形参闭包，又可以等DOM结构加载完才会执行
+          3. 不论哪一种办法都是保证dom结构加载完才会执行，这样在方法中肯定能获取到元素，防止把js放在DOM之前加载。（引申问题：JS/CSS/IMG 结构加载的顺序和机制，浏览器渲染机制）
+     */
+    let box = document.getElementById('box');
+    /* 
+      box.onclick 给盒子的点击事件绑定方法
+     */
+    // box.onclick = function() {
+    //   alert('ok');
+    // }
+    // console.dir(box);
+
+    // DOM2事件绑定的时候一般不绑定匿名方法，以便后面移除对应的方法
+    function fn1() {}
+    function fn2() {}
+    box.addEventListener('click', fn1);
+    box.addEventListener('click', fn2);
+    // 移除
+    box.removeEventListener('click', fn1);
+    box.removeEventListener('click', fn2);
+
+    box.onclick = function(e) {
+      /* 
+        MouseEvent 鼠标事件对象
+        type: 时间类型： 'click'
+        target: 事件源 触发的元素，IE6-8 使用 srcElement
+        clientX/clientY 当前鼠标触发的点距离串口左上角的 x/y 坐标
+        pageX/pageY 当前鼠标触发点距离当前页面左上角的 x/y轴坐标 （不兼容IE低版本浏览器）
+        e.preventDefault() 阻止默认行为，兼容处理 e.returnValue = false;
+        e.stopPropagation() 阻止冒泡传播，兼容处理 e.cancelBubble = ture;
+       */
+      console.log(e);
+    }
+
+    document.onkeydown = function(e) {
+      console.log(e);
+      /* 
+        keyEvent 键盘事件对象
+        keyCode/which 获取键盘码
+          空格 32，enter 13，backspace: 8 del: 46，shift/control/alt: 16/17/18
+        shiftKey 是否按下shift，组合键的标识
+       */
+    }
+
+    window.onload = function(e) {
+      console.log(e);
+    }
+
+    box.ontouchstart = function(e) {
+      console.log(e);
+      /* 
+        此事件只有在移动端才会生效
+          touchs/changedTouches，touchs 只能获取手指在屏幕上的时候的信息，如果手指离开，信息就没了
+          而changedTouches 相对于touches来讲可以获取到手指离开的信息，所以项目中用 changedTouches比较多
+       */
+      let point = e.changedTouches;
+    }
+
+    window.oncontextmenu = function(e) {
+      e.preventDefault();
+    }
+  </script>
+
+  <!-- javascript:; 阻止默认行为 -->
+  <a href="http://www.baidu.com" id="link">baidu</a>
+  <script>
+    var link = document.getElementById('link');
+    link.onclick = function(e) {
+      // 点击的时候会先触发他的click事件，再跳转
+      e.preventDefault();
+    }
+  </script>
+
+  <!-- 事件传播 -->
+  <div id="outer">
+    <div id="inner">
+      <div id="center"></div>
+    </div>
+  </div>
+  <script>
+    /* 
+      事件的传播机制
+      Event.prototype:
+        AT_TARGET: 2 => 目标阶段
+        BUBBLING_PHASE: 3 => 冒泡阶段
+        CAPTURING_PHASE: 1  => 捕获阶段
+
+      当前元素的某个事件被触发，一定会经历三个阶段：
+        捕获阶段：从最外层容器一直向里层查找，知道找到当前触发的事件源为止，查找的目的，建立起当前元素未来冒泡传播的路线
+        目标阶段：把当前元素的相关事件行为触发，如果绑定了方法则把方法执行
+        冒泡阶段：不仅当前元素的相关事件行为会被触发，而且，在捕获阶段获取的路径中的每一个元素的相关事件行为也会触发（顺序从里向外）（其父级所有的相关事件行为也会被触发），如果也对应绑定了方法，方法也会被触发执行
+     */
+
+    // window -> document -> HTML -> body -> outer -> inner -> center
+    // DOM0事件绑定的方法都是控制在目标或者冒泡阶段执行的，DOM2 可以控制在捕获阶段执行 (xxx.addEventListener('click', fn, true), 最后一个参数为true就是在捕获阶段执行，一般都不用)
+    // 一次点击，执行了四个方法，每个方法中都有e事件对象，此时四个对象是同一个，时间对象和在哪个方法中出现没关系，事件对象是用来记录本次操作的信息，除非重新操作，那么上一次的信息就没了，e存储的是最新的操作信息
+    document.body.onclick = function(e) {
+      console.log('body:', e)
+    }
+    outer.onclick = function(e) {
+      console.log('outer:', e)
+    }
+    inner.onclick = function(e) {
+      console.log('inner:', e)
+    }
+    center.onclick = function(e) {
+      e.stopPropagation(); // 阻止冒泡
+      console.log('center:', e)
+    }
+
+    /* 
+      阻止事件的传播机制， e.stopPropagation();
+     */
+  </script>
+</body>
+</html>
